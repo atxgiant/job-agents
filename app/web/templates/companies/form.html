@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% set data = form_data if form_data is defined else company %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="h3 mb-0">{{ "Edit Company" if company else "New Company" }}</h1>
+  <a class="btn btn-outline-secondary" href="{{ url_for('companies.list_companies') }}">Back to Companies</a>
+</div>
+
+<form method="post" action="{{ url_for('companies.update_company', company_id=company.id) if company else url_for('companies.create_company') }}">
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-body row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Name</label>
+            <input class="form-control" name="name" required value="{{ data.name if data else '' }}">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Ticker</label>
+            <input class="form-control" name="ticker" value="{{ data.ticker if data else '' }}">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Type</label>
+            <select class="form-select" name="company_type">
+              {% for company_type in company_types %}
+                {% set selected = (data.company_type.value if data and data.company_type is defined else data.company_type if data else 'unknown') == company_type.value %}
+                <option value="{{ company_type.value }}" {% if selected %}selected{% endif %}>{{ company_type.value }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Website URL</label>
+            <input class="form-control" name="website_url" value="{{ data.website_url if data else '' }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Careers URL</label>
+            <input class="form-control" name="careers_url" value="{{ data.careers_url if data else '' }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">ATS Provider</label>
+            <input class="form-control" name="ats_provider" value="{{ data.ats_provider if data else '' }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">ATS Company Identifier</label>
+            <input class="form-control" name="ats_company_identifier" value="{{ data.ats_company_identifier if data else '' }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Industry Tags</label>
+            <input class="form-control" name="industry_tags" value="{{ data.industry_tags if data else '' }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Product Tags</label>
+            <input class="form-control" name="product_tags" value="{{ data.product_tags if data else '' }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Headquarters</label>
+            <input class="form-control" name="headquarters_location" value="{{ data.headquarters_location if data else '' }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Public Status</label>
+            <input class="form-control" name="public_status" value="{{ data.public_status if data else '' }}">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" name="company_description" rows="4">{{ data.company_description if data else '' }}</textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card shadow-sm mb-4">
+        <div class="card-body row g-3">
+          <div class="col-12">
+            {% if company %}
+              <label class="form-label">Lifecycle Status</label>
+              <input class="form-control" value="{{ company.status.value }}" disabled>
+              <input type="hidden" name="status" value="{{ company.status.value }}">
+              <div class="form-text">Use the explicit lifecycle actions on the detail page to activate, deactivate, reject, exclude, or reactivate.</div>
+            {% else %}
+              <label class="form-label">Lifecycle Status</label>
+              <select class="form-select" name="status">
+                {% for status in statuses %}
+                  {% set selected = (data.status.value if data and data.status is defined else data.status if data else 'active') == status.value %}
+                  <option value="{{ status.value }}" {% if selected %}selected{% endif %}>{{ status.value }}</option>
+                {% endfor %}
+              </select>
+            {% endif %}
+          </div>
+          <div class="col-12">
+            <label class="form-label">Scan Block</label>
+            <input class="form-control" name="scan_block" value="{{ data.scan_block if data and data.scan_block is not none else '' }}" placeholder="Leave blank for automatic assignment">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Scan Frequency Override</label>
+            <input class="form-control" name="scan_frequency_override" value="{{ data.scan_frequency_override if data else '' }}">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Aliases</label>
+            <input class="form-control" name="aliases" value="{% if data and data.aliases is defined %}{{ data.aliases | map(attribute='alias') | join(', ') }}{% elif data and data.aliases %}{{ data.aliases }}{% endif %}" placeholder="Comma-separated">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Rejection Reason</label>
+            <textarea class="form-control" name="rejection_reason" rows="2">{{ data.rejection_reason if data else '' }}</textarea>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Exclusion Reason</label>
+            <textarea class="form-control" name="exclusion_reason" rows="2">{{ data.exclusion_reason if data else '' }}</textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="card shadow-sm">
+        <div class="card-body row g-3">
+          <div class="col-12">
+            <label class="form-label">Seed Source</label>
+            <input class="form-control" name="seed_source" value="{{ data.seed_source if data else '' }}">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Seed Run ID</label>
+            <input class="form-control" name="seed_run_id" value="{{ data.seed_run_id if data else '' }}">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Seed Rationale</label>
+            <textarea class="form-control" name="seed_rationale" rows="3">{{ data.seed_rationale if data else '' }}</textarea>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Source URLs</label>
+            <textarea class="form-control" name="source_urls" rows="3">{{ data.source_urls if data else '' }}</textarea>
+          </div>
+          <div class="col-12 d-grid">
+            <button class="btn btn-primary" type="submit">{{ "Save Changes" if company else "Create Company" }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+{% endblock %}

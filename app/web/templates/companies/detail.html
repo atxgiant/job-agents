@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+  <div>
+    <h1 class="h3 mb-1">{{ company.name }}</h1>
+    <p class="text-secondary mb-0">{{ company.website_url or "No website URL" }}</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-primary" href="{{ url_for('companies.edit_company', company_id=company.id) }}">Edit</a>
+    <a class="btn btn-outline-secondary" href="{{ url_for('companies.list_companies') }}">Back</a>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-4"><strong>Status:</strong> <span class="badge text-bg-{% if company.status.value == 'active' %}success{% elif company.status.value == 'inactive' %}secondary{% else %}warning{% endif %}">{{ company.status.value }}</span></div>
+          <div class="col-md-4"><strong>Eligible for scanning:</strong> {{ "Yes" if company.active_for_scanning else "No" }}</div>
+          <div class="col-md-4"><strong>Scan block:</strong> {{ company.scan_block if company.scan_block is not none else "auto" }}</div>
+          <div class="col-md-4"><strong>Type:</strong> {{ company.company_type.value }}</div>
+          <div class="col-md-4"><strong>Ticker:</strong> {{ company.ticker or "—" }}</div>
+          <div class="col-md-4"><strong>Seed source:</strong> {{ company.seed_source or "manual" }}</div>
+          <div class="col-md-6"><strong>Careers URL:</strong> {{ company.careers_url or "—" }}</div>
+          <div class="col-md-6"><strong>ATS provider:</strong> {{ company.ats_provider or "—" }}</div>
+          <div class="col-12"><strong>Industry tags:</strong> {{ company.industry_tags or "—" }}</div>
+          <div class="col-12"><strong>Product tags:</strong> {{ company.product_tags or "—" }}</div>
+          <div class="col-12"><strong>Seed rationale:</strong> {{ company.seed_rationale or "—" }}</div>
+          <div class="col-12"><strong>Source URLs:</strong> <pre class="mb-0 small">{{ company.source_urls or "—" }}</pre></div>
+          <div class="col-md-6"><strong>Rejection reason:</strong> {{ company.rejection_reason or "—" }}</div>
+          <div class="col-md-6"><strong>Exclusion reason:</strong> {{ company.exclusion_reason or "—" }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="h5">Company Audit Timeline</h2>
+        <div class="list-group list-group-flush">
+          {% for event in audit_events %}
+            <div class="list-group-item px-0">
+              <div class="d-flex justify-content-between">
+                <div class="fw-semibold">{{ event.event_type }}</div>
+                <div class="text-secondary small">{{ event.created_at }}</div>
+              </div>
+              <div class="small text-secondary">Actor: {{ event.actor_type.value }}{% if event.reason %} · Reason: {{ event.reason }}{% endif %}</div>
+            </div>
+          {% else %}
+            <div class="text-secondary">No audit events yet.</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <h2 class="h5">Lifecycle Actions</h2>
+        <div class="d-grid gap-2">
+          <form method="post" action="{{ url_for('companies.activate_company', company_id=company.id) }}"><button class="btn btn-success w-100" type="submit">Activate</button></form>
+          <form method="post" action="{{ url_for('companies.deactivate_company', company_id=company.id) }}"><button class="btn btn-outline-secondary w-100" type="submit">Deactivate</button></form>
+          <form method="post" action="{{ url_for('companies.reactivate_company', company_id=company.id) }}" onsubmit="return confirm('Reactivate this company?');"><button class="btn btn-outline-primary w-100" type="submit">Explicitly Reactivate</button></form>
+        </div>
+        <hr>
+        <form method="post" action="{{ url_for('companies.reject_company', company_id=company.id) }}" onsubmit="return confirm('Reject this company?');">
+          <label class="form-label">Reject with reason</label>
+          <textarea class="form-control mb-2" name="reason" rows="2" required></textarea>
+          <button class="btn btn-warning w-100" type="submit">Reject Company</button>
+        </form>
+        <hr>
+        <form method="post" action="{{ url_for('companies.exclude_company', company_id=company.id) }}" onsubmit="return confirm('Exclude this company?');">
+          <label class="form-label">Exclude with reason</label>
+          <textarea class="form-control mb-2" name="reason" rows="2" required></textarea>
+          <button class="btn btn-danger w-100" type="submit">Exclude Company</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="h5">Scan Block Assignment</h2>
+        <form method="post" action="{{ url_for('companies.assign_scan_block', company_id=company.id) }}">
+          <label class="form-label">Current block</label>
+          <input class="form-control mb-2" name="scan_block" value="{{ company.scan_block if company.scan_block is not none else '' }}" placeholder="Leave blank for automatic assignment">
+          <button class="btn btn-dark w-100" type="submit">Save Scan Block</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

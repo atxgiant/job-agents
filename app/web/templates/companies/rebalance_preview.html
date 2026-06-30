@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="h3 mb-1">Scan Block Rebalance Preview</h1>
+    <p class="text-secondary mb-0">Only automatically assigned active companies are included.</p>
+  </div>
+  <a class="btn btn-outline-secondary" href="{{ url_for('companies.list_companies') }}">Back to Companies</a>
+</div>
+
+<div class="card shadow-sm mb-4">
+  <div class="card-body">
+    <p class="mb-3">Total blocks: <strong>{{ total_scan_blocks }}</strong></p>
+    <form method="post" action="{{ url_for('companies.rebalance') }}">
+      <button class="btn btn-primary" type="submit" onclick="return confirm('Apply automatic scan-block rebalance?');">Apply Rebalance</button>
+    </form>
+  </div>
+</div>
+
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table mb-0">
+      <thead class="table-light">
+        <tr><th>Company</th><th>Current Block</th><th>Proposed Block</th></tr>
+      </thead>
+      <tbody>
+        {% for preview in previews %}
+          <tr>
+            <td>{{ preview.company_name }}</td>
+            <td>{{ preview.current_block if preview.current_block is not none else "auto" }}</td>
+            <td>{{ preview.proposed_block }}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="3" class="text-center text-secondary py-4">No automatically assigned active companies need rebalancing.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
