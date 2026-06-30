@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-12">
+    <div class="p-4 bg-white rounded shadow-sm border">
+      <h1 class="h3 mb-2">Local-first job search control center</h1>
+      <p class="text-secondary mb-0">
+        Head Hunter is wired to a private candidate profile and ready for company registry,
+        scanning, and workflow orchestration.
+      </p>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="h6 text-uppercase text-secondary">Active Companies</h2>
+        <p class="display-6 mb-0">{{ stats.active_companies }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="h6 text-uppercase text-secondary">New Jobs</h2>
+        <p class="display-6 mb-0">{{ stats.new_jobs }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="h6 text-uppercase text-secondary">Interested Roles</h2>
+        <p class="display-6 mb-0">{{ stats.interested_jobs }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <h2 class="h5">Candidate Profile</h2>
+        <p class="mb-1"><strong>Source:</strong> {{ profile.source_path }}</p>
+        <p class="mb-1"><strong>Hash:</strong> <code>{{ profile.content_hash[:16] }}</code></p>
+        <p class="mb-0"><strong>Loaded:</strong> {{ profile.loaded_at }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <h2 class="h5">Runtime Config</h2>
+        <p class="mb-1"><strong>DB:</strong> {{ config.database_url }}</p>
+        <p class="mb-1"><strong>Temporal queue:</strong> {{ config.temporal_task_queue }}</p>
+        <p class="mb-0"><strong>Scan blocks:</strong> {{ config.scan_policy.total_scan_blocks }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,21 @@
+seed_policy:
+  enabled: true
+  provider: openai
+  model: configurable-model-name
+  interval_days: 30
+  seed_prompt: >
+    Identify public and pre-IPO companies that fit the target company profile.
+  reference_universe:
+    type: public_index
+    name: Russell 1000 look-alike universe
+    source: configurable
+  inclusion_criteria:
+    - Favor companies building physical products or operating field-deployed products.
+    - Prioritize connected products, retail, consumer, EV and mobility, industrial technology, smart home, building systems, logistics, robotics, and autonomous systems.
+    - Include pre-IPO companies that resemble selected public companies or fit the same connected-product profile.
+  exclusion_criteria:
+    - Exclude pure-play generic SaaS without a meaningful physical-world component.
+    - Exclude oil and gas, pharma, insurance, healthcare, and Canonical.
+  automatic_activation: true
+  max_candidates_per_run: 100
+  max_llm_budget_usd_per_run: 10.00

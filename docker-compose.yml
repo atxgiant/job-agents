@@ -1,0 +1,21 @@
+services:
+  temporal:
+    image: temporalio/auto-setup:1.25.2
+    container_name: head-hunter-temporal
+    environment:
+      DB: sqlite
+      DB_PORT: 0
+      DYNAMIC_CONFIG_FILE_PATH: config/dynamicconfig/development-sql.yaml
+    ports:
+      - "7233:7233"
+
+  temporal-ui:
+    image: temporalio/ui:2.31.2
+    container_name: head-hunter-temporal-ui
+    environment:
+      TEMPORAL_ADDRESS: temporal:7233
+      TEMPORAL_CORS_ORIGINS: http://localhost:5000
+    ports:
+      - "8233:8080"
+    depends_on:
+      - temporal

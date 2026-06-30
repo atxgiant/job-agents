@@ -1,0 +1,22 @@
+app_env: development
+host: 127.0.0.1
+port: 5000
+flask_secret_key: replace-me
+database_url: sqlite:///data/head_hunter.db
+candidate_profile_path: skillset.local.md
+csv_export_directory: data/exports
+log_level: INFO
+temporal_namespace: default
+temporal_task_queue: head-hunter
+default_company_scan_timeout: 45
+exclusion_policy:
+  excluded_companies:
+    - Canonical
+feature_toggles:
+  llm_scoring: true
+  playwright_fallback: false
+score_weights:
+  fit: 0.45
+  competitiveness: 0.30
+  interest: 0.20
+  recency: 0.05

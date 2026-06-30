@@ -1,0 +1,16 @@
+scan_policy:
+  enabled: true
+  cadence: daily
+  total_scan_blocks: 7
+  scan_block_strategy: rotating
+  companies_per_run_limit: 50
+  per_company_timeout_seconds: 45
+  retry_policy:
+    maximum_attempts: 3
+    initial_interval_seconds: 30
+    maximum_interval_seconds: 600
+  respect_rate_limits: true
+  user_agent: HeadHunter/0.1
+  revalidate_open_roles:
+    enabled: true
+    cadence: weekly
