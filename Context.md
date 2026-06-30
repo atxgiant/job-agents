@@ -47,6 +47,25 @@ The UI may render in a profile-unavailable state, but any future candidate-speci
 9. Temporal is the durable workflow orchestration and execution-history layer, not the business system of record.
 10. All future workflows must preserve manual user decisions and never overwrite company rejection, job review status, notes, or applied dates.
 
+## Job lifecycle rules
+
+- Every newly discovered posting starts as `review_status = not_reviewed`.
+- Every newly discovered posting starts as `career_site_status = active` unless the source is incomplete or ambiguous.
+- `first_seen_at` is immutable once set.
+- `last_seen_at` updates when the role appears in a successful authoritative scan.
+- `last_verified_at` updates when the role is checked.
+- A successful authoritative scan may mark previously active jobs as `removed` when they disappear from the official source.
+- Failed, incomplete, or unsupported scans must never mark jobs as removed.
+- If a removed job reappears in a later authoritative scan, it returns to `active` without losing its history.
+- Manual review status, notes, rejection reason, and applied date are immutable to scans.
+
+## Job source-of-truth rules
+
+- SQLite remains the authoritative job state store.
+- Official Greenhouse source responses are authoritative only when the scan completes successfully and the board response is complete.
+- Job scan observations preserve what the source looked like during a specific scan.
+- Job status history preserves manual and system state transitions separately from the current row snapshot.
+
 ## Initial target-company policy example
 
 This policy must remain configurable data rather than application logic:

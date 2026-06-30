@@ -4,7 +4,7 @@ Head Hunter is a local-first personal job-search agent for discovering, classify
 
 ## Current status
 
-The repository now includes the Phase 2 company-registry vertical slice:
+The repository now includes the Phase 3 Greenhouse job-ingestion vertical slice:
 
 - Flask app factory and Bootstrap dashboard shell
 - Typed settings loading from YAML and `.env`
@@ -15,6 +15,9 @@ The repository now includes the Phase 2 company-registry vertical slice:
 - Company registry UI with create, edit, activate, deactivate, reject, exclude, reactivate, and scan-block assignment actions
 - CSV import and export with validation reporting and idempotent upsert logic
 - Deterministic scan-block rebalance preview and apply flow
+- Greenhouse-only official-source job ingestion for a manually scanned company
+- Job lifecycle persistence with observations, status history, and removal detection
+- Opportunities review UI with manual review statuses, notes, and CSV export
 - CLI and Makefile entrypoints
 - Initial docs and baseline tests
 
@@ -25,6 +28,32 @@ This repo includes a public [SKILLSET.md](./SKILLSET.md) template and expects yo
 Private candidate profile files are gitignored so you can store role history, quantified achievements, targeting logic, and other personal material without committing it. `skillset.md` is not an active convention in this project.
 
 If `skillset.local.md` is unavailable, the UI still renders, but candidate-specific workflows must fail closed instead of generating empty ranking or reseeding output.
+
+## Configure a Greenhouse company
+
+Set the company to:
+
+- `status = active`
+- `ats_provider = greenhouse`
+- `ats_company_identifier = <greenhouse board token>`
+
+You can also provide an official Greenhouse board URL through the company configuration, but the board token is the cleanest setup.
+
+## Run a manual Greenhouse scan
+
+1. Open the Companies page.
+2. Create or edit an active company with Greenhouse configuration.
+3. Open the company detail page.
+4. Use `Scan Greenhouse Board`.
+
+The scan creates a scan run, fetches roles from the official Greenhouse source, normalizes and ingests the results, and updates discovered jobs on both the company detail page and the Opportunities view.
+
+## Review status vs career-site status
+
+- Review status is the local user decision: `not_reviewed`, `interested`, `rejected`, or `applied`.
+- Career-site status is the source-derived availability state: `active`, `removed`, `unknown`, `scan_failed`, or `unsupported`.
+
+Scans may change career-site status, but they must not overwrite manual review decisions, notes, rejection reasons, or applied dates.
 
 ## Prerequisites
 
@@ -70,5 +99,6 @@ make worker
 
 ## Known limitations
 
-- ATS scanning, job lifecycle management, LLM-assisted reseeding, and job scoring are not implemented yet.
-- Temporal workflows and worker activities remain in a pre-production scaffold stage.
+- Greenhouse is the only supported ATS provider in this phase.
+- Manual single-company scans are supported; scheduled and batch scans are not yet behind Temporal activities.
+- LLM scoring, multi-provider ATS support, reseeding, and daVinci workflows are not implemented yet.

@@ -21,6 +21,27 @@ flowchart LR
   LLMProvider --> SQLite
 ```
 
+## Job ingestion sequence
+
+```mermaid
+sequenceDiagram
+  participant U as Flask Action
+  participant S as Scan Service
+  participant G as Greenhouse Adapter
+  participant N as Normalization + Ingestion
+  participant D as SQLite
+  participant R as UI Result
+
+  U->>S: scan_company_greenhouse(company_id)
+  S->>G: validate_company_source(company)
+  S->>G: discover_jobs(company)
+  G-->>S: RawJobPosting[]
+  S->>N: normalize + ingest
+  N->>D: upsert jobs, observations, status history, scan run
+  D-->>S: persisted results
+  S-->>R: scan summary
+```
+
 ## Phase 2 company registry boundary
 
 - Flask routes collect form input, show Bootstrap views, and trigger service methods.
@@ -33,6 +54,7 @@ flowchart LR
 - Temporal workflows must remain deterministic.
 - HTTP, filesystem, timestamp, provider, and database interactions belong in activities.
 - Flask requests should start workflows through the Temporal client rather than perform long-running work inline.
+- The current manual Greenhouse scan service is intentionally shaped so the exact service contract can move into a Temporal activity in Phase 4.
 
 ## Security and privacy boundaries
 
