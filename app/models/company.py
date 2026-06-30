@@ -13,6 +13,7 @@ from app.models.enums import CompanyStatus, CompanyType
 if TYPE_CHECKING:
     from app.models.audit import AuditEvent
     from app.models.job import JobPosting
+    from app.models.run import ScanRun
 
 
 class Company(TimestampMixin, Base):
@@ -54,6 +55,7 @@ class Company(TimestampMixin, Base):
     )
     audit_events: Mapped[list[AuditEvent]] = relationship(back_populates="company")
     job_postings: Mapped[list[JobPosting]] = relationship(back_populates="company")
+    scan_runs: Mapped[list[ScanRun]] = relationship(back_populates="company")
 
     @hybrid_property
     def active_for_scanning(self) -> bool:

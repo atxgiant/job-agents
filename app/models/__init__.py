@@ -1,7 +1,7 @@
 from app.models.audit import AuditEvent
 from app.models.base import Base
 from app.models.company import Company, CompanyAlias
-from app.models.job import JobPosting
+from app.models.job import JobPosting, JobScanObservation, JobStatusHistory
 from app.models.run import LLMUsageRecord, ScanRun, WorkflowRun
 
 __all__ = [
@@ -10,6 +10,8 @@ __all__ = [
     "Company",
     "CompanyAlias",
     "JobPosting",
+    "JobScanObservation",
+    "JobStatusHistory",
     "LLMUsageRecord",
     "ScanRun",
     "WorkflowRun",

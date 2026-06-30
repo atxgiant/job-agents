@@ -37,6 +37,19 @@ class WorkflowStatus(StrEnum):
     FAILED = "failed"
 
 
+class ScanRunStatus(StrEnum):
+    PENDING = "pending"
+    RUNNING = "running"
+    COMPLETED = "completed"
+    COMPLETED_WITH_WARNINGS = "completed_with_warnings"
+    FAILED = "failed"
+    UNSUPPORTED = "unsupported"
+
+
+class ScanType(StrEnum):
+    MANUAL_GREENHOUSE = "manual_greenhouse"
+
+
 class ActorType(StrEnum):
     LOCAL_USER = "local_user"
     SYSTEM = "system"
