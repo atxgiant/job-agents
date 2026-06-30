@@ -8,6 +8,10 @@ from pathlib import Path
 from app.config.settings import load_runtime_config
 
 
+class CandidateProfileUnavailableError(FileNotFoundError):
+    """Raised when a required private candidate profile is unavailable."""
+
+
 @dataclass(slots=True)
 class CandidateProfile:
     source_path: Path
@@ -25,15 +29,11 @@ class CandidateProfileService:
         if self.source_path.exists():
             return self.source_path
 
-        fallback = Path("SKILLSET.md")
-        if fallback.exists():
-            return fallback
-
-        raise FileNotFoundError(
-            f"Candidate profile file not found at {self.source_path} or fallback {fallback}"
+        raise CandidateProfileUnavailableError(
+            f"Private candidate profile file not found at {self.source_path}"
         )
 
-    def load(self) -> CandidateProfile:
+    def load_required(self) -> CandidateProfile:
         source_path = self._resolve_source_path()
         raw_text = source_path.read_text(encoding="utf-8")
         content_hash = hashlib.sha256(raw_text.encode("utf-8")).hexdigest()
@@ -43,3 +43,12 @@ class CandidateProfileService:
             loaded_at=datetime.now(UTC),
             raw_text=raw_text,
         )
+
+    def load_optional(self) -> CandidateProfile | None:
+        try:
+            return self.load_required()
+        except CandidateProfileUnavailableError:
+            return None
+
+    def load(self) -> CandidateProfile:
+        return self.load_required()

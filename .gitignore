@@ -18,7 +18,6 @@ data/exports/*
 !data/cache/.gitkeep
 !data/exports/.gitkeep
 
-/skillset.md
 /skillset.local.md
 /SKILLSET.local.md
 

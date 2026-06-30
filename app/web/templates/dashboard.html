@@ -39,9 +39,16 @@
     <div class="card shadow-sm h-100">
       <div class="card-body">
         <h2 class="h5">Candidate Profile</h2>
-        <p class="mb-1"><strong>Source:</strong> {{ profile.source_path }}</p>
-        <p class="mb-1"><strong>Hash:</strong> <code>{{ profile.content_hash[:16] }}</code></p>
-        <p class="mb-0"><strong>Loaded:</strong> {{ profile.loaded_at }}</p>
+        {% if profile %}
+          <p class="mb-1"><strong>Source:</strong> {{ profile.source_path }}</p>
+          <p class="mb-1"><strong>Hash:</strong> <code>{{ profile.content_hash[:16] }}</code></p>
+          <p class="mb-0"><strong>Loaded:</strong> {{ profile.loaded_at }}</p>
+        {% else %}
+          <div class="alert alert-warning mb-0">
+            Candidate profile unavailable. The UI can still render, but candidate-specific
+            workflows must fail closed until `skillset.local.md` is available locally.
+          </div>
+        {% endif %}
       </div>
     </div>
   </div>

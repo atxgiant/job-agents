@@ -4,13 +4,17 @@ Head Hunter is a local-first personal job-search agent for discovering, classify
 
 ## Current status
 
-The repository now includes the Phase 1 foundation:
+The repository now includes the Phase 2 company-registry vertical slice:
 
 - Flask app factory and Bootstrap dashboard shell
 - Typed settings loading from YAML and `.env`
-- Candidate profile loading from a private local markdown file
+- Candidate profile loading from a private local markdown file with fail-closed behavior for candidate-specific workflows
 - SQLAlchemy models and Alembic migration scaffold
 - Local Temporal Docker Compose stack
+- Company lifecycle services and persistent audit events
+- Company registry UI with create, edit, activate, deactivate, reject, exclude, reactivate, and scan-block assignment actions
+- CSV import and export with validation reporting and idempotent upsert logic
+- Deterministic scan-block rebalance preview and apply flow
 - CLI and Makefile entrypoints
 - Initial docs and baseline tests
 
@@ -18,7 +22,9 @@ The repository now includes the Phase 1 foundation:
 
 This repo includes a public [SKILLSET.md](./SKILLSET.md) template and expects your real private profile to live in `skillset.local.md` or another local path configured in `config/settings.example.yaml`.
 
-Private candidate profile files are gitignored so you can store role history, quantified achievements, targeting logic, and other personal material without committing it.
+Private candidate profile files are gitignored so you can store role history, quantified achievements, targeting logic, and other personal material without committing it. `skillset.md` is not an active convention in this project.
+
+If `skillset.local.md` is unavailable, the UI still renders, but candidate-specific workflows must fail closed instead of generating empty ranking or reseeding output.
 
 ## Prerequisites
 
@@ -42,6 +48,7 @@ head-hunter serve
 ```bash
 make test
 make lint
+ruff format --check .
 make db-upgrade
 make temporal-up
 make temporal-down
@@ -63,5 +70,5 @@ make worker
 
 ## Known limitations
 
-- Company CRUD, scan orchestration, ATS adapters, and LLM scoring are scaffolded conceptually but not fully implemented yet.
-- Temporal workflows and worker activities are still in the foundation stage.
+- ATS scanning, job lifecycle management, LLM-assisted reseeding, and job scoring are not implemented yet.
+- Temporal workflows and worker activities remain in a pre-production scaffold stage.

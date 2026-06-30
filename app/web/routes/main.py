@@ -11,7 +11,7 @@ main_bp = Blueprint("main", __name__)
 @main_bp.get("/")
 def dashboard():
     stats = DashboardService().get_stats()
-    profile = CandidateProfileService().load()
+    profile = CandidateProfileService().load_optional()
     return render_template(
         "dashboard.html",
         stats=stats,
@@ -22,11 +22,12 @@ def dashboard():
 
 @main_bp.get("/health")
 def health():
-    profile = CandidateProfileService().load()
+    profile = CandidateProfileService().load_optional()
     return jsonify(
         {
             "status": "ok",
-            "candidate_profile_hash": profile.content_hash,
-            "candidate_profile_path": str(profile.source_path),
+            "candidate_profile_hash": profile.content_hash if profile else None,
+            "candidate_profile_path": str(profile.source_path) if profile else None,
+            "candidate_profile_available": profile is not None,
         }
     )

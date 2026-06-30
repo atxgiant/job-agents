@@ -8,6 +8,8 @@ Head Hunter uses YAML plus environment variables.
 - `config/seed-policy.example.yaml`
 - `config/scan-policy.example.yaml`
 - `.env.example`
+- `SKILLSET.md` public template
+- `skillset.local.md` private candidate profile
 
 ## Environment variables
 
@@ -26,3 +28,4 @@ Head Hunter uses YAML plus environment variables.
 
 - LLM budget caps should be enforced per run and over time.
 - When limits are reached, workflows should skip optional LLM work safely.
+- Candidate-specific workflows must fail closed when `skillset.local.md` is unavailable.

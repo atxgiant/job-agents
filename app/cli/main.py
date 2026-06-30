@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 
 from app.repositories.db import get_engine
-from app.services.candidate_profile import CandidateProfileService
+from app.services.candidate_profile import CandidateProfileService, CandidateProfileUnavailableError
 from app.web.app import create_app
 
 
@@ -22,12 +22,20 @@ def cmd_worker(_args):
 
 
 def cmd_profile_refresh(_args):
-    profile = CandidateProfileService().load()
+    profile = CandidateProfileService().load_required()
     print(f"Loaded profile {profile.source_path} ({profile.content_hash[:16]})")
 
 
 def cmd_stub(_args):
     print("Command scaffolded. Implementation will land in a later phase.")
+
+
+def cmd_candidate_specific_placeholder(_args):
+    try:
+        CandidateProfileService().load_required()
+    except CandidateProfileUnavailableError as exc:
+        raise SystemExit(f"Candidate-specific operation blocked: {exc}") from exc
+    print("Command scaffolded. Candidate profile is available for future implementation.")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -62,12 +70,12 @@ def build_parser() -> argparse.ArgumentParser:
         sub.set_defaults(func=cmd_stub)
 
     reseed_parser = subparsers.add_parser("reseed")
-    reseed_parser.set_defaults(func=cmd_stub)
+    reseed_parser.set_defaults(func=cmd_candidate_specific_placeholder)
 
     digest_parser = subparsers.add_parser("digest")
     digest_sub = digest_parser.add_subparsers(dest="digest_command", required=True)
     weekly = digest_sub.add_parser("weekly")
-    weekly.set_defaults(func=cmd_stub)
+    weekly.set_defaults(func=cmd_candidate_specific_placeholder)
 
     for name in ["healthcheck"]:
         sub = subparsers.add_parser(name)
