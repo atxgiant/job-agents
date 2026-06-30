@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Enum, Float, ForeignKey, String, Text
+from sqlalchemy import Float, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.models.base import Base, TimestampMixin
+from app.models.base import Base, TimestampMixin, enum_type
 from app.models.enums import CareerSiteStatus, ReviewStatus
 
 if TYPE_CHECKING:
@@ -42,10 +42,13 @@ class JobPosting(TimestampMixin, Base):
     skill_gaps: Mapped[str | None] = mapped_column(Text)
     role_family: Mapped[str | None] = mapped_column(String(255), index=True)
     review_status: Mapped[ReviewStatus] = mapped_column(
-        Enum(ReviewStatus), default=ReviewStatus.NOT_REVIEWED, index=True, nullable=False
+        enum_type(ReviewStatus), default=ReviewStatus.NOT_REVIEWED, index=True, nullable=False
     )
     career_site_status: Mapped[CareerSiteStatus] = mapped_column(
-        Enum(CareerSiteStatus), default=CareerSiteStatus.ACTIVE, index=True, nullable=False
+        enum_type(CareerSiteStatus),
+        default=CareerSiteStatus.ACTIVE,
+        index=True,
+        nullable=False,
     )
     user_notes: Mapped[str | None] = mapped_column(Text)
 

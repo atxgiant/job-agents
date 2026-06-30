@@ -1,12 +1,11 @@
 from enum import StrEnum
 
 
-class CompanyLifecycle(StrEnum):
+class CompanyStatus(StrEnum):
     ACTIVE = "active"
     INACTIVE = "inactive"
     REJECTED = "rejected"
     EXCLUDED = "excluded"
-    PENDING_REVIEW = "pending_review"
 
 
 class CompanyType(StrEnum):
@@ -36,3 +35,8 @@ class WorkflowStatus(StrEnum):
     RUNNING = "running"
     SUCCEEDED = "succeeded"
     FAILED = "failed"
+
+
+class ActorType(StrEnum):
+    LOCAL_USER = "local_user"
+    SYSTEM = "system"

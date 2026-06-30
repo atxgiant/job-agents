@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from sqlalchemy import Enum, Float, String, Text
+from sqlalchemy import Float, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.models.base import Base, TimestampMixin
+from app.models.base import Base, TimestampMixin, enum_type
 from app.models.enums import WorkflowStatus
 
 
@@ -15,7 +15,7 @@ class ScanRun(TimestampMixin, Base):
     workflow_run_id: Mapped[str | None] = mapped_column(String(255), index=True)
     scope: Mapped[str | None] = mapped_column(String(255))
     status: Mapped[WorkflowStatus] = mapped_column(
-        Enum(WorkflowStatus), default=WorkflowStatus.PENDING, nullable=False, index=True
+        enum_type(WorkflowStatus), default=WorkflowStatus.PENDING, nullable=False, index=True
     )
     jobs_discovered: Mapped[int] = mapped_column(default=0, nullable=False)
     jobs_updated: Mapped[int] = mapped_column(default=0, nullable=False)
@@ -30,7 +30,7 @@ class WorkflowRun(TimestampMixin, Base):
     workflow_name: Mapped[str] = mapped_column(String(100), index=True)
     workflow_run_id: Mapped[str | None] = mapped_column(String(255), index=True)
     status: Mapped[WorkflowStatus] = mapped_column(
-        Enum(WorkflowStatus), default=WorkflowStatus.PENDING, nullable=False, index=True
+        enum_type(WorkflowStatus), default=WorkflowStatus.PENDING, nullable=False, index=True
     )
     summary: Mapped[str | None] = mapped_column(Text)
 

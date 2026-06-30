@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import MetaData, func
+from sqlalchemy import Enum, MetaData, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 convention = {
@@ -20,4 +20,12 @@ class TimestampMixin:
     created_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         server_default=func.now(), onupdate=func.now(), nullable=False
+    )
+
+
+def enum_type(enum_cls):
+    return Enum(
+        enum_cls,
+        values_callable=lambda values: [item.value for item in values],
+        native_enum=False,
     )

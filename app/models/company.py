@@ -1,14 +1,17 @@
 from __future__ import annotations
 
+from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, Enum, ForeignKey, Integer, String, Text
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.models.base import Base, TimestampMixin
-from app.models.enums import CompanyLifecycle, CompanyType
+from app.models.base import Base, TimestampMixin, enum_type
+from app.models.enums import CompanyStatus, CompanyType
 
 if TYPE_CHECKING:
+    from app.models.audit import AuditEvent
     from app.models.job import JobPosting
 
 
@@ -23,10 +26,7 @@ class Company(TimestampMixin, Base):
     ats_provider: Mapped[str | None] = mapped_column(String(100))
     ats_company_identifier: Mapped[str | None] = mapped_column(String(255))
     company_type: Mapped[CompanyType] = mapped_column(
-        Enum(CompanyType), default=CompanyType.UNKNOWN, nullable=False
-    )
-    lifecycle_state: Mapped[CompanyLifecycle] = mapped_column(
-        Enum(CompanyLifecycle), default=CompanyLifecycle.ACTIVE, index=True, nullable=False
+        enum_type(CompanyType), default=CompanyType.UNKNOWN, nullable=False, index=True
     )
     public_status: Mapped[str | None] = mapped_column(String(100))
     ticker: Mapped[str | None] = mapped_column(String(20), index=True)
@@ -34,23 +34,30 @@ class Company(TimestampMixin, Base):
     product_tags: Mapped[str | None] = mapped_column(Text)
     company_description: Mapped[str | None] = mapped_column(Text)
     headquarters_location: Mapped[str | None] = mapped_column(String(255))
-    active_for_scanning: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-    rejected: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    rejection_reason: Mapped[str | None] = mapped_column(Text)
-    excluded: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    exclusion_reason: Mapped[str | None] = mapped_column(Text)
+    status: Mapped[CompanyStatus] = mapped_column(
+        enum_type(CompanyStatus), default=CompanyStatus.ACTIVE, index=True, nullable=False
+    )
     scan_block: Mapped[int | None] = mapped_column(Integer, index=True)
     scan_frequency_override: Mapped[str | None] = mapped_column(String(100))
-    last_scan_status: Mapped[str | None] = mapped_column(String(100))
-    last_scan_error: Mapped[str | None] = mapped_column(Text)
-    seed_source: Mapped[str | None] = mapped_column(String(255))
-    seed_prompt_version: Mapped[str | None] = mapped_column(String(255))
+    seed_source: Mapped[str | None] = mapped_column(String(255), index=True)
     seed_run_id: Mapped[str | None] = mapped_column(String(255), index=True)
     seed_rationale: Mapped[str | None] = mapped_column(Text)
     source_urls: Mapped[str | None] = mapped_column(Text)
+    rejection_reason: Mapped[str | None] = mapped_column(Text)
+    exclusion_reason: Mapped[str | None] = mapped_column(Text)
+    last_scanned_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    next_scheduled_scan_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    scan_assignment_mode: Mapped[str] = mapped_column(String(20), default="auto", nullable=False)
 
-    aliases: Mapped[list[CompanyAlias]] = relationship(back_populates="company")
+    aliases: Mapped[list[CompanyAlias]] = relationship(
+        back_populates="company", cascade="all, delete-orphan"
+    )
+    audit_events: Mapped[list[AuditEvent]] = relationship(back_populates="company")
     job_postings: Mapped[list[JobPosting]] = relationship(back_populates="company")
+
+    @hybrid_property
+    def active_for_scanning(self) -> bool:
+        return self.status == CompanyStatus.ACTIVE
 
 
 class CompanyAlias(TimestampMixin, Base):
