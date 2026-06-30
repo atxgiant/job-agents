@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import asyncio
+
 from flask import (
     Blueprint,
     Response,
@@ -12,9 +14,13 @@ from flask import (
 
 from app.config.settings import load_runtime_config
 from app.models.enums import CompanyStatus, CompanyType
-from app.repositories.company_repository import CompanyFilters
+from app.repositories.audit_repository import AuditRepository
+from app.repositories.company_repository import CompanyFilters, CompanyRepository
 from app.repositories.db import get_session
+from app.repositories.job_repository import JobRepository
+from app.scanners.ats.greenhouse import GreenhouseAdapter
 from app.services.company_registry import CompanyLifecycleError, CompanyRegistryService
+from app.services.company_scan import CompanyScanError, CompanyScanService
 
 company_bp = Blueprint("companies", __name__, url_prefix="/companies")
 
@@ -113,10 +119,18 @@ def company_detail(company_id: int):
         service = CompanyRegistryService(session)
         company = service.get_company(company_id)
         audit_events = service.company_audit_timeline(company_id)
+        jobs = JobRepository(session).list_company_jobs(company_id)
+        scan_runs = JobRepository(session).list_scan_runs_for_company(company_id)
+    greenhouse_validation = None
+    if company.status == CompanyStatus.ACTIVE:
+        greenhouse_validation = asyncio.run(GreenhouseAdapter().validate_company_source(company))
     return render_template(
         "companies/detail.html",
         company=company,
         audit_events=audit_events,
+        jobs=jobs,
+        scan_runs=scan_runs,
+        greenhouse_validation=greenhouse_validation,
         statuses=list(CompanyStatus),
         company_types=list(CompanyType),
     )
@@ -213,6 +227,30 @@ def assign_scan_block(company_id: int):
     with get_session() as session:
         CompanyRegistryService(session).assign_scan_block(company_id, scan_block)
     flash("Scan block updated.", "success")
+    return redirect(url_for("companies.company_detail", company_id=company_id))
+
+
+@company_bp.post("/<int:company_id>/scan-greenhouse")
+def scan_greenhouse(company_id: int):
+    with get_session() as session:
+        scan_service = CompanyScanService(
+            CompanyRepository(session),
+            JobRepository(session),
+            AuditRepository(session),
+        )
+        try:
+            result = scan_service.scan_company_greenhouse(company_id)
+        except CompanyScanError as exc:
+            flash(f"Scan failed: {exc.message}", "danger")
+            return redirect(url_for("companies.company_detail", company_id=company_id))
+    flash(
+        (
+            f"Greenhouse scan completed. Discovered {result.discovered_count}, "
+            f"created {result.created_count}, updated {result.updated_count}, "
+            f"marked removed {result.marked_removed_count}."
+        ),
+        "success",
+    )
     return redirect(url_for("companies.company_detail", company_id=company_id))
 
 

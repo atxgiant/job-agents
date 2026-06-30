@@ -58,6 +58,26 @@
   <div class="col-lg-4">
     <div class="card shadow-sm mb-4">
       <div class="card-body">
+        <h2 class="h5">Manual Scan</h2>
+        {% if company.status.value == 'active' and greenhouse_validation and greenhouse_validation.valid %}
+          <p class="small text-secondary">Configured for official Greenhouse scanning from {{ greenhouse_validation.board_url }}.</p>
+          <form method="post" action="{{ url_for('companies.scan_greenhouse', company_id=company.id) }}">
+            <button class="btn btn-primary w-100" type="submit">Scan Greenhouse Board</button>
+          </form>
+        {% elif company.status.value == 'active' %}
+          <div class="alert alert-warning small mb-0">
+            {{ greenhouse_validation.error_message if greenhouse_validation else "Company is active but does not have a supported Greenhouse source configured." }}
+          </div>
+        {% else %}
+          <div class="alert alert-secondary small mb-0">
+            Company scanning is unavailable because this company is not active.
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
         <h2 class="h5">Lifecycle Actions</h2>
         <div class="d-grid gap-2">
           <form method="post" action="{{ url_for('companies.activate_company', company_id=company.id) }}"><button class="btn btn-success w-100" type="submit">Activate</button></form>
@@ -87,6 +107,55 @@
           <input class="form-control mb-2" name="scan_block" value="{{ company.scan_block if company.scan_block is not none else '' }}" placeholder="Leave blank for automatic assignment">
           <button class="btn btn-dark w-100" type="submit">Save Scan Block</button>
         </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 mt-1">
+  <div class="col-lg-6">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="h5">Discovered Jobs</h2>
+        <div class="list-group list-group-flush">
+          {% for job in jobs %}
+            <a class="list-group-item list-group-item-action px-0" href="{{ url_for('opportunities.opportunity_detail', job_id=job.id) }}">
+              <div class="d-flex justify-content-between">
+                <div>{{ job.title }}</div>
+                <div class="small text-secondary">{{ job.review_status.value }} · {{ job.career_site_status.value }}</div>
+              </div>
+              <div class="small text-secondary">{{ job.location or "—" }} · found {{ job.first_seen_at|relative_age }}</div>
+            </a>
+          {% else %}
+            <div class="text-secondary">No jobs discovered yet.</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="h5">Scan History</h2>
+        <div class="list-group list-group-flush">
+          {% for run in scan_runs %}
+            <div class="list-group-item px-0">
+              <div class="d-flex justify-content-between">
+                <div>{{ run.status.value }}</div>
+                <div class="small text-secondary">{{ run.created_at }}</div>
+              </div>
+              <div class="small text-secondary">
+                discovered {{ run.jobs_discovered_count }}, created {{ run.jobs_created_count }},
+                updated {{ run.jobs_updated_count }}, removed {{ run.jobs_marked_removed_count }}
+              </div>
+              {% if run.error_message %}
+                <div class="small text-danger">{{ run.error_code }}: {{ run.error_message }}</div>
+              {% endif %}
+            </div>
+          {% else %}
+            <div class="text-secondary">No scan history yet.</div>
+          {% endfor %}
+        </div>
       </div>
     </div>
   </div>

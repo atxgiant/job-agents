@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+  <div>
+    <h1 class="h3 mb-1">{{ job.title }}</h1>
+    <p class="text-secondary mb-0">{{ job.company.name }}</p>
+  </div>
+  <a class="btn btn-outline-secondary" href="{{ url_for('opportunities.list_opportunities') }}">Back</a>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6"><strong>Location:</strong> {{ job.location or "—" }}</div>
+          <div class="col-md-6"><strong>Department:</strong> {{ job.department or "—" }}</div>
+          <div class="col-md-6"><strong>Employment type:</strong> {{ job.employment_type or "—" }}</div>
+          <div class="col-md-6"><strong>Compensation:</strong> {{ job.salary_text or "—" }}</div>
+          <div class="col-md-6"><strong>Review status:</strong> {{ job.review_status.value }}</div>
+          <div class="col-md-6"><strong>Career-site status:</strong> {{ job.career_site_status.value }}</div>
+          <div class="col-md-4"><strong>First seen:</strong> {{ job.first_seen_at }}</div>
+          <div class="col-md-4"><strong>Last seen:</strong> {{ job.last_seen_at }}</div>
+          <div class="col-md-4"><strong>Last verified:</strong> {{ job.last_verified_at }}</div>
+          <div class="col-12">
+            <a class="btn btn-sm btn-outline-primary" href="{{ job.source_url }}" target="_blank" rel="noreferrer">Open Official Posting</a>
+            {% if job.application_url and job.application_url != job.source_url %}
+              <a class="btn btn-sm btn-outline-success" href="{{ job.application_url }}" target="_blank" rel="noreferrer">Open Application URL</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <h2 class="h5">Job Description</h2>
+        <details open>
+          <summary class="mb-3">Show normalized description</summary>
+          <pre class="small mb-0" style="white-space: pre-wrap;">{{ job.job_description_text or "No description captured." }}</pre>
+        </details>
+      </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <h2 class="h5">Scan Observation Timeline</h2>
+        <div class="list-group list-group-flush">
+          {% for observation in observations %}
+            <div class="list-group-item px-0">
+              <div class="d-flex justify-content-between">
+                <div>{{ observation.observed_status.value }}</div>
+                <div class="small text-secondary">{{ observation.observed_at }}</div>
+              </div>
+              <div class="small text-secondary">{{ observation.title_snapshot or "—" }} · {{ observation.location_snapshot or "—" }}</div>
+            </div>
+          {% else %}
+            <div class="text-secondary">No observations yet.</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="h5">Status History</h2>
+        <div class="list-group list-group-flush">
+          {% for item in history %}
+            <div class="list-group-item px-0">
+              <div class="d-flex justify-content-between">
+                <div>{{ item.event_type }}</div>
+                <div class="small text-secondary">{{ item.created_at }}</div>
+              </div>
+              <div class="small text-secondary">Actor: {{ item.actor_type.value }}{% if item.reason %} · {{ item.reason }}{% endif %}</div>
+            </div>
+          {% else %}
+            <div class="text-secondary">No history yet.</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <h2 class="h5">Review Actions</h2>
+        <form method="post" action="{{ url_for('opportunities.update_opportunity_status', job_id=job.id) }}" class="mb-3">
+          <label class="form-label">Review status</label>
+          <select class="form-select mb-2" name="review_status">
+            {% for status in review_statuses %}
+              <option value="{{ status.value }}" {% if job.review_status == status %}selected{% endif %}>{{ status.value }}</option>
+            {% endfor %}
+          </select>
+          <label class="form-label">Reason</label>
+          <textarea class="form-control mb-2" name="reason" rows="2">{{ job.rejection_reason or "" }}</textarea>
+          <label class="form-label">Applied date</label>
+          <input class="form-control mb-2" type="date" name="applied_at" value="{{ job.applied_at.date().isoformat() if job.applied_at else '' }}">
+          <button class="btn btn-primary w-100" type="submit">Save Review Status</button>
+        </form>
+        <div class="alert alert-secondary small mb-0">Revalidation is a later-phase workflow and is not wired in this phase.</div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="h5">User Notes</h2>
+        <form method="post" action="{{ url_for('opportunities.update_opportunity_notes', job_id=job.id) }}">
+          <textarea class="form-control mb-2" name="user_notes" rows="8">{{ job.user_notes or "" }}</textarea>
+          <button class="btn btn-dark w-100" type="submit">Save Notes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

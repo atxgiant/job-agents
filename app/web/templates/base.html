@@ -18,7 +18,7 @@
         <a class="navbar-brand" href="/">Head Hunter</a>
         <div class="navbar-nav">
           <a class="nav-link" href="/">Dashboard</a>
-          <a class="nav-link disabled" href="#">Opportunities</a>
+          <a class="nav-link" href="{{ url_for('opportunities.list_opportunities') }}">Opportunities</a>
           <a class="nav-link" href="{{ url_for('companies.list_companies') }}">Companies</a>
           <a class="nav-link disabled" href="#">Scan Runs</a>
           <a class="nav-link disabled" href="#">Reseeding</a>
